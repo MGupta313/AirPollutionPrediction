@@ -4,7 +4,7 @@
 <head>
 
   <meta charset=utf-8 />
-  <title>India Census - 2011</title>
+  <title>India Air Pollution Trends</title>
 
   <script src='https://api.tiles.mapbox.com/mapbox.js/v2.1.5/mapbox.js'></script>
   <link href='https://api.tiles.mapbox.com/mapbox.js/v2.1.5/mapbox.css' rel='stylesheet' />
@@ -86,7 +86,7 @@
 <body>
 
 <div class="census-banner">
-    <a href="http://www.census2011.co.in/" target="_blank">India Census - 2011</a>
+    <a href="https://www.kaggle.com/shrutibhargava94/india-air-quality-data" target="_blank">India Air Pollution</a>
 </div>
 
 <nav id='capitals-filter-div' class='filter-ui'>
@@ -109,7 +109,25 @@
 
 <!-- <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script> -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
-<script type="text/javascript" src="./data/airpollution.js"></script>
+<script type="text/javascript" src="./data/literacy.js"></script>
+<!-- <script type="text/javascript" src="../data/pollution-data.csv"></script> -->
+<script type="text/javascript"charset="utf-8">
+    d3.text("./data/pollution-data.csv", function(data) {
+        var parsedCSV = data.data; //d3.csv.parseRows(data);
+
+        // var container = d3.select("body")
+        //     .append("table")
+        //
+        //     .selectAll("tr")
+        //         .data(parsedCSV).enter()
+        //         .append("tr")
+        //
+        //     .selectAll("td")
+        //         .data(function(d) { return d; }).enter()
+        //         .append("td")
+        //         .text(function(d) { return d; });
+    });
+</script>
 
 <script>
     L.mapbox.accessToken = 'pk.eyJ1IjoiaW5pdGRvdCIsImEiOiJ3VkkxTldvIn0.7UPZ8q9fgBE70dMV7e0sLw';
@@ -547,77 +565,3 @@
 
 </body>
 </html>
-
-
-
-<!-- <!DOCTYPE html>
-<html lang="en">
-<meta charset="UTF-8">
-<style>
-    .states{
-        fill:none;
-        stroke: #fff;
-        stroke-linejoin:round;
-    }
-
-    text.mono{
-        font-size:10pt;
-        font-family:Consolas,courier;
-    }
-</style>
-<body>
-<div class="container" id="map"></div>
-    <script src="./lib/d3.v5.min.js"></script>
-    <script src="./lib/d3-dsv.min.js"></script>
-    <script src="./lib/d3-fetch.min.js"></script>
-    <script src="./lib/d3-tip.min.js"></script>
-    <script src="./lib/d3-scale-chromatic.v1.min.js"></script>
-    <script src="./lib/topojson.v2.min.js"></script>
-<script>
-
-var margin = {top: 150, right: 250, bottom: 70, left: 150}
-  , width = window.innerWidth  // Use the window's width
-  , height = window.innerHeight ; // Use the window's height
-
-var earthquakes = d3.map();
-var projection = d3.geoAlbersUsa().translate([width/2,height/2]);
-var path = d3.geoPath().projection(projection);
-var svg = d3.select("#map").append("svg")
-    .attr("width", width)
-    .attr("height",height)
-    .append("g")
-
-var promises = [
-    d3.json("./data/india-states.json"),
-    d3.csv("./data/state-earthquakes.csv", function (d){
-        earthquakes.set(
-          d.States, {
-            count: +d["Total Earthquakes"],
-            region: d.Region});})];
-
-Promise.all(promises).then(ready)
-
-function ready([us]) {
-    var maxCount = d3.max(d3.values(earthquakes), function(d){return d.count})
-
-    var tip = d3.tip()
-        .attr("class","d3-tip")
-        .offset([-7,0])
-        .html(function(d) {return "State:"+d.properties.name+"Region:"+earthquakes.get(d.properties.name).region+"Total Earthquakes:"+earthquakes.get(d.properties.name).count;})
-
-    var colorScale = d3.scaleLog().domain([1,maxCount]).range([d3.interpolateReds(0.1),d3.interpolateReds(1)]);
-
-    svg.append("g")
-       .call(tip).attr("class","states").selectAll("path")
-       .data(topojson.feature(us,us.objects.states).features)
-       .enter().append("path")
-       .style("fill",function(d){ if (earthquakes.has(d.properties.name)) return colorScale(earthquakes.get(d.properties.name).count)})
-       .attr("d",path).on('mouseover',tip.show)
-
-    svg.append("path").datum(topojson.mesh(us,us.objects.states, function(a,b){return a!= b;}))
-       .attr("class","states").attr("d",path)
-}
-
-</script>
-</body>
-</html> -->
