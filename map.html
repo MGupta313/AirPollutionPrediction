@@ -100,10 +100,11 @@
 
 <script id="popup-template" type="text/template">
     <h2>{{state}}</h2>
+    <strong>Air Quality Index: </strong>{{aiq}} <br>
     <strong>Capital: </strong>{{capital}} <br>
     <strong>Population: </strong>{{population}} <br>
     <strong>Area: </strong>{{area}} square kilometer <br>
-    <strong>Density: {{density}}</strong> people per square kilometer <br>
+    <strong>Density: </strong>{{density}} people per square kilometer <br>
     <strong>Growth: </strong>{{growth}} % <br>
 </script>
 
@@ -111,24 +112,6 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
 <script type="text/javascript" src="./data/literacy.js"></script>
 <script type="text/javascript" src="./data/stateCodes.js"></script>
-
-<script type="text/javascript"charset="utf-8">
-    d3.text("./data/pollution-data.csv", function(data) {
-        var parsedCSV = data.data; //d3.csv.parseRows(data);
-
-        // var container = d3.select("body")
-        //     .append("table")
-        //
-        //     .selectAll("tr")
-        //         .data(parsedCSV).enter()
-        //         .append("tr")
-        //
-        //     .selectAll("td")
-        //         .data(function(d) { return d; }).enter()
-        //         .append("td")
-        //         .text(function(d) { return d; });
-    });
-</script>
 
 <script>
     L.mapbox.accessToken = 'pk.eyJ1IjoiaW5pdGRvdCIsImEiOiJ3VkkxTldvIn0.7UPZ8q9fgBE70dMV7e0sLw';
@@ -194,14 +177,16 @@
 
     function mousemove(e) {
         var layer = e.target;
-        var state = mapCodeToState[feature.properties.code];
+        var code = layer.feature.properties.code;
+        var state = mapCodeToState[code];
         var popupData = {
-            state: indiaCensus.states[layer.feature.properties.code].name,
-            density: indiaCensus.states[layer.feature.properties.code].density,
-            area: indiaCensus.states[layer.feature.properties.code].area,
-            growth: indiaCensus.states[layer.feature.properties.code].growth,
-            population: indiaCensus.states[layer.feature.properties.code].population,
-            capital: indiaCensus.states[layer.feature.properties.code].capital.name
+            aiq: state_pollution[state],
+            state: indiaCensus.states[code].name,
+            density: indiaCensus.states[code].density,
+            area: indiaCensus.states[code].area,
+            growth: indiaCensus.states[code].growth,
+            population: indiaCensus.states[code].population,
+            capital: indiaCensus.states[code].capital.name
         };
 
         popup.setLatLng(e.latlng);
@@ -223,7 +208,7 @@
             layer.bringToFront();
         }
         // update the graph with literacy and sex ratio data
-        updateGraph( indiaCensus.states[layer.feature.properties.code] );
+        updateGraph( state_pollution[state] );
     }
 
     function mouseout(e) {
@@ -257,19 +242,7 @@
         return '<span>People per square km</span><br>' + labels.join('<br>');
     }
 
-    // ref: https://www.mapbox.com/mapbox.js/api/v2.1.6/l-icontrol/
-	var PieGraphControl = L.Control.extend({
-        options: {
-			position: 'topright'
-		},
-
-		onAdd: function (map) {
-			// create the control container with a particular class name
-			var container = L.DomUtil.create('div', 'pie-graph');
-			// ... initialize other DOM elements, add listeners, etc.
-			return container;
-		}
-	});
+    // Pie Graph Controller removed here.
 
     var BarGraphControl = L.Control.extend({
         options: {
@@ -284,98 +257,10 @@
         }
     });
 
-    // add the piegraph and bar graph container
-	map.addControl( new PieGraphControl() )
-        .addControl( new BarGraphControl() );
+    // add only bar graph container
+     map.addControl( new BarGraphControl() );
 
-    // START: Pie Graph
-    var width = 250,
-        height = 150,
-        pieColors = {
-            male: "steelblue",
-            female: "pink"
-        };
-
-    var pieName = d3.select(".pie-graph")
-                        .append("div")
-                    .text("Delhi")
-                    .style("color", "white")
-                    .style("font-size", "15px")
-                    .style("font-weight", "bold")
-                    .style("margin", "6px 0");
-
-    // append the svg elements to the graph containers
-    var pieSvg = d3.select(".pie-graph")
-                .append("svg")
-                .attr("id", "pie-graph")
-                .attr("width", width)
-                .attr("height", height)
-                    .append("g")
-                .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
-
-    var pieLegend = d3.select(".pie-graph")
-                        .append("div")
-                        .attr("id", "pie-legend");
-
-    pieLegend.append("i")
-            .style("background", pieColors.female)
-            .style("padding", "5px")
-            .style("color", "black")
-            .text("Female");
-
-    pieLegend.append("i")
-            .style("background", pieColors.male)
-            .style("padding", "5px")
-            .style("color", "black")
-            .text("Male");
-
-    pieLegend.append("div")
-                .html("<strong>Sex Ratio: </strong>Females for every 1000 Males")
-                .style("color", "white")
-                .style("margin-top", "5px");
-
-	var pieRadius = 60;
-
-    var arc = d3.svg.arc()
-                .outerRadius( pieRadius - 5 )
-                .innerRadius( 0 );
-
-    var pieData = [];
-
-    // initial data for Delhi
-    pieData.push( { type: "male", ratio: 1000, color: pieColors.male } );
-    pieData.push( { type: "female", ratio: 868, color: pieColors.female } );
-
-    var pie = d3.layout.pie()
-                .sort(null)
-                .value( function(d) { return d.ratio; } )
-                // realigns the sector in the circle
-                .startAngle(3*Math.PI)
-                .endAngle(1*Math.PI)
-                // enable this for half circle view
-                //.startAngle(-90 * (Math.PI/180))
-                //.endAngle(90 * (Math.PI/180))
-                ;
-
-    var piePieces = pieSvg.selectAll(".pie-piece")
-                        .data( pie(pieData) )
-                            .enter().append("g")
-                        .attr("class", "pie-piece");
-
-    piePieces.append("path")
-            .attr("d", arc)
-            .style("fill", function(d) { return d.data.color; } )
-            // the data is bound to the parent 'pie-piece' element
-            // but we need the data in the child path element for animating the arc
-            // store the oldangle data in the path element to animate the arc
-            .each( function(d) { this._oldAngle = d; } );
-
-    piePieces.append("text")
-                .attr("transform", function(d) { return "translate(" + arc.centroid(d) + ")"; } )
-                .attr("dy", ".35em")
-                .style("text-anchor", "middle")
-                .text( function(d) { return d.data.ratio; } );
-    // END: Pie Graph
+    // Pie Graph Container removed here.
 
     // START: Bar Graph (Literacy)
     var barWidth = 250,
@@ -394,7 +279,7 @@
 
     var barHolder = d3.select(".bar-graph")
                             .append("svg")
-                        .attr("id", "literacy-bar")
+                        .attr("id", "pollution-bar")
                         .attr("width", barWidth)
                         .attr("height", barHeight)
                             .append("rect")
@@ -408,13 +293,13 @@
                         .style("color", "white")
                         .style("font-weight", "bold")
                         .style("font-size", "15px")
-                        .text("Literacy: ")
+                        .text("Air Quality Index: ")
                             .append("span")
                         .attr("id", "literacy-percent")
                         .text(literacyData[0].toFixed(2) + "%")
                         .style("color", getLiteracyColor( literacyData[0] ) );
 
-    var litBar = d3.select("#literacy-bar").selectAll("rect")
+    var litBar = d3.select("#pollution-bar").selectAll("rect")
                         .data( literacyData )
                         .attr("height", function(d) {
                             var h = barHeight*(d/100);
@@ -429,45 +314,16 @@
     // END: Bar Graph (Literacy)
 
     // START: Updates both Pie Graph and Bar Graph
-    function updateGraph ( graphData ) {
-        // Update Pie Graph
-        pieData = [];
-
-        pieData.push( { type: "male", ratio: 1000, color: pieColors.male } );
-        pieData.push( { type: "female", ratio: graphData.sexratio, color: pieColors.female } );
-
-        // update pie
-        var pieUpdate = pieSvg.selectAll(".pie-piece")
-                                // bind the new updated data
-                                .data( pie(pieData) );
-        // update pie arc
-        pieUpdate.select("path")
-                    .transition().delay(300).attrTween("d", function(d) {
-                        // we have stored the angle data in path element in _oldAngle
-                        var i = d3.interpolate( this._oldAngle, d );
-                        // update the old angle data with current angle data
-                        this._oldAngle = i(0);
-                        //return a functor
-                        return function(t) {
-                            return arc( i(t) );
-                        }
-                    });
-        // update pie text
-        pieUpdate.select("text")
-                .attr("transform", function(d) { return "translate(" + arc.centroid(d) + ")"; } )
-                .attr("dy", ".35em")
-                .style("text-anchor", "middle")
-                .text( function(d) { return d.data.ratio; } );
-        // update state name in pie graph
-        pieName.text( graphData.name );
+    function updateGraph ( aqiData ) {
+        // Update Pie Graph removed here.
 
         // Update Bar Graph
-        barName.text( graphData.name );
+        barName.text( aqiData );
 
         literacyData = [];
-        literacyData.push( +graphData.literacy );
+        literacyData.push( +aqiData );
 
-        d3.select("#literacy-bar").selectAll("rect")
+        d3.select("#pollution-bar").selectAll("rect")
                         .data( literacyData )
                         .transition().duration(500)
                         .attr("height", function(d) {
@@ -481,9 +337,9 @@
                         })
                         .style("fill",  function(d) { return getLiteracyColor(d); } );
 
-        barLegend.text( graphData.literacy.toFixed(2) + "%" )
+        barLegend.text( aqiData.toFixed(2) )
                 .transition().duration(500)
-                .style("color", getLiteracyColor(+graphData.literacy) );
+                .style("color", getLiteracyColor(+aqiData) );
     }// END: updateChart()
 
     function getLiteracyColor (literacy) {
@@ -519,6 +375,7 @@
 
         for (var state in indiaCensus.states) {
             var capitalData = indiaCensus.states[state].capital;
+            var capitalPollution = state_pollution[mapCodeToState[state]];
             // capital marker geojson data
             capitalData.details.forEach( function ( capital, index ) {
                 // location is normally in (latitude, longitude) format
@@ -532,6 +389,7 @@
                     },
                     "properties": {
                       "title": capital.name,
+                      // "aqi": capitalPollution[index],
                       "description": capital.population ? "<strong>Population: </strong>" + capital.population : "(census data not available)",
                       "data": capital,
                       "marker-color": "#ffb90f",
@@ -545,17 +403,17 @@
         // add the marker layer
         capitalLayer = L.mapbox.featureLayer( capitalGeoJson ).addTo( map );
         // open the popup on hover
-        capitalLayer.on('mouseover', function(e) {
-            e.layer.openPopup();
-            // update the graph if census details is present
-            if (e.layer.feature.properties.data.sexratio) {
-                updateGraph( e.layer.feature.properties.data );
-            }
-        });
+        // capitalLayer.on('mouseover', function(e) {
+        //     e.layer.openPopup();
+        //     // update the graph if census details is present
+        //     if (e.layer.feature.properties.data.aqi) {
+        //         updateGraph( e.layer.feature.properties.data );
+        //     }
+        // });
 
-        capitalLayer.on('mouseout', function(e) {
-            e.layer.closePopup();
-        });
+        // capitalLayer.on('mouseout', function(e) {
+        //     e.layer.closePopup();
+        // });
     }
 
     function setCapitalFilterPosition () {

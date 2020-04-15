@@ -9,7 +9,7 @@ var mapCodeToState = {
   "GJ": "Gujarat",
   "HR": "Haryana",
   "HP": "Himachal Pradesh",
-  "JK": "Jammu and Kashmir",
+  "JK": "Jammu & Kashmir",
   "JH": "Jharkhand",
   "KA": "Karnataka",
   "KL": "Kerala",
@@ -19,7 +19,7 @@ var mapCodeToState = {
   "ML": "Meghalaya",
   "MZ": "Mizoram",
   "NL": "Nagaland",
-  "OR": "Orissa",
+  "OR": "Odisha",
   "PB": "Punjab",
   "RJ": "Rajasthan",
   "SK": "Sikkim",
@@ -31,3 +31,12 @@ var mapCodeToState = {
   "AN": "Andaman and Nicobar",
   "LD": "Lakshadweep",
 };
+
+var state_pollution = 0;
+var city_pollution = 0;
+d3.json("./data/pollution-stats-state.json", function(data) {
+  state_pollution = data;
+});
+d3.json("./data/pollution-stats-city.json", function(data) {
+  city_pollution = data;
+});
