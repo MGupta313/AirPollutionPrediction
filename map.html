@@ -110,7 +110,8 @@
 <!-- <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script> -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
 <script type="text/javascript" src="./data/literacy.js"></script>
-<!-- <script type="text/javascript" src="../data/pollution-data.csv"></script> -->
+<script type="text/javascript" src="./data/stateCodes.js"></script>
+
 <script type="text/javascript"charset="utf-8">
     d3.text("./data/pollution-data.csv", function(data) {
         var parsedCSV = data.data; //d3.csv.parseRows(data);
@@ -155,6 +156,7 @@
     } );
 
     function getStyle(feature) {
+        var state = mapCodeToState[feature.properties.code];
         return {
             weight: 2,
             opacity: 0.1,
@@ -186,9 +188,13 @@
         });
     }
 
+    function convertStateCodeToState(code) {
+
+    }
+
     function mousemove(e) {
         var layer = e.target;
-
+        var state = mapCodeToState[feature.properties.code];
         var popupData = {
             state: indiaCensus.states[layer.feature.properties.code].name,
             density: indiaCensus.states[layer.feature.properties.code].density,
