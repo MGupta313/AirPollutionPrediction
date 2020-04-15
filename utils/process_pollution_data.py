@@ -2,6 +2,43 @@ import csv
 import pdb
 import json
 
+from air_quality_index import AQI
+
+
+def _get_numerical_value(num):
+    try:
+        num = float(num)
+    except ValueError:
+        num = 0
+    return num
+
+
+def calculate_stats(aqi_calculator, all_entries):
+
+    num_entries = len(all_entries)
+    aqi = 0.0
+    for entry in all_entries:
+        so2 = _get_numerical_value(entry['so2'])
+        no2 = _get_numerical_value(entry['no2'])
+        spm = _get_numerical_value(entry['spm'])
+        rspm = _get_numerical_value(entry['rspm'])
+
+        aqi += aqi_calculator.calculate_aqi(so2, no2, spm, rspm)
+
+    avg_aqi = aqi / num_entries
+
+    # stats = {
+    #     'aqi': avg_aqi,
+    #     'so2': avg_so2,
+    #     'no2': avg_no2,
+    #     'rspm': avg_rspm,
+    #     'spm': avg_spm,
+    #     'pm2_5': avg_pm2_5
+    # }
+
+    return avg_aqi, aqi, num_entries
+
+
 def extract_data(filename_csv):
     processed_data = {}
     with open(filename_csv, newline='') as csvfile:
@@ -40,10 +77,11 @@ def extract_data(filename_csv):
                     else:
                         processed_data[state][city].append(pruned_data)
 
-    print(i, ' entries have \'NA\' dates and are ignored.')
+    print(i, 'entries have \'NA\' dates and are ignored.')
     return processed_data
 
-def process_stats(extracted_data, results_filepath):
+
+def process_stats(extracted_data, results_dir):
     '''
     Generates dictionary with averaged stats. Saves dictionary as JSON file.
 
@@ -51,37 +89,35 @@ def process_stats(extracted_data, results_filepath):
         extracted_data(Map)
     '''
 
+    aqi_calculator = AQI()
     city_level_dict = {}
+    state_level_dict = {}
     for state in extracted_data:
+        # state-wide stats
+        sum_state_aqi = 0.0
+        total_num_entries = 0
+
         for city in extracted_data[state]:
-            stats = calculate_stats(extract_data[state][city])
+            avg_aqi, aqi, num_entries = calculate_stats(aqi_calculator, extracted_data[state][city])
+            sum_state_aqi += aqi
+            total_num_entries += num_entries
 
             if state not in city_level_dict:
                 city_level_dict[state] = {}
-            city_level_dict[state][city] = stats
+            city_level_dict[state][city] = aqi
 
-    pdb.set_trace()
-    print(city_level_dict)
+        avg_state_aqi = sum_state_aqi / total_num_entries
+        state_level_dict[state] = avg_state_aqi
 
-    with open(city_level_dict, 'w') as fp:
+    with open(results_dir+'pollution-stats-city.json', 'w') as fp:
         json.dump(city_level_dict, fp)
 
-    #state_level_dict = {}
-    #for key in extracted_data:
-        #state_level_dict[key]
+    with open(results_dir+'pollution-stats-state.json', 'w') as fp:
+        json.dump(state_level_dict, fp)
 
-    # with open(results_filepath, 'w') as fp:
-    #     json.dump(state_level_dict, fp)
-
-
-    return None
-
-def calculate_stats(all_entries):
-    len = len(all_entries)
-    for entry in all_entries:
-        print("in progress")
+    return city_level_dict, state_level_dict
 
 
 if __name__=='__main__':
     extracted_data = extract_data('../data/pollution-data.csv')
-    stats = process_stats(extracted_data, '../data/pollution-stats.json')
+    city_level_dict, state_level_dict = process_stats(extracted_data, '../data/')
