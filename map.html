@@ -344,7 +344,7 @@
 
     function getLiteracyColor (literacy) {
         // color from colorbrew
-        var literacyBrew = ['rgb(215,25,28)','rgb(253,174,97)','rgb(166,217,106)','rgb(26,150,65)'].reverse(),
+        var literacyBrew = ['rgb(215,25,28)','rgb(253,174,97)','rgb(166,217,106)','rgb(26,150,65)']
             literacyRange = [ 90, 80, 70, 60];
 
         literacy = +literacy;
@@ -358,7 +358,7 @@
     // draw the layer with capital markers
     var capitalLayer;
 
-    drawCapitalMarkers();
+    // drawCapitalMarkers();
 
     // add the capitals toggle checkbox
     var capitalFilter = document.getElementById("capitals-filter"),
@@ -403,17 +403,17 @@
         // add the marker layer
         capitalLayer = L.mapbox.featureLayer( capitalGeoJson ).addTo( map );
         // open the popup on hover
-        // capitalLayer.on('mouseover', function(e) {
-        //     e.layer.openPopup();
-        //     // update the graph if census details is present
-        //     if (e.layer.feature.properties.data.aqi) {
-        //         updateGraph( e.layer.feature.properties.data );
-        //     }
-        // });
+        capitalLayer.on('mouseover', function(e) {
+            e.layer.openPopup();
+            // update the graph if census details is present
+            if (e.layer.feature.properties.data.aqi) {
+                updateGraph( e.layer.feature.properties.data );
+            }
+        });
 
-        // capitalLayer.on('mouseout', function(e) {
-        //     e.layer.closePopup();
-        // });
+        capitalLayer.on('mouseout', function(e) {
+            e.layer.closePopup();
+        });
     }
 
     function setCapitalFilterPosition () {
