@@ -5,6 +5,17 @@ import json
 from air_quality_index import AQI
 
 
+EMPTY_DATA = {
+    'year': -1,
+    'month': -1,
+    'date': -1,
+    'so2': 0,
+    'no2': 0,
+    'rspm': 0,
+    'spm': 0,
+    'pm2_5': 0
+}
+
 def _get_numerical_value(num):
     try:
         num = float(num)
@@ -37,6 +48,11 @@ def calculate_stats(aqi_calculator, all_entries):
     # }
 
     return avg_aqi, aqi, num_entries
+
+
+def add_missing_data(processed_data):
+    processed_data["Tripura"] = {"Agartala": [EMPTY_DATA]}
+    return processed_data
 
 
 def extract_data(filename_csv):
@@ -76,7 +92,7 @@ def extract_data(filename_csv):
                         processed_data[state][city] = [pruned_data]
                     else:
                         processed_data[state][city].append(pruned_data)
-
+    processed_data = add_missing_data(processed_data)
     print(i, 'entries have \'NA\' dates and are ignored.')
     return processed_data
 
