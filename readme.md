@@ -7,10 +7,10 @@ India state and city map data was created after referencing this blog: https://g
 
 TODO:
 
-[ ] Add the yearly split into the pre-processed data
-[ ] Add Year picker at the bottom of the map. Only display selected year's data.
+[] Add the yearly split into the pre-processed data.  
+[] Add Year picker at the bottom of the map. Only display selected year's data.  
 
-[ ] Zooming in should show all the cities (as icons)
-[ ] Hovering over these cities should pull up their respective AQI values. (data is data/pollution-stats-city.json).
+[] Zooming in should show all the cities (as icons).  
+[] Hovering over these cities should pull up their respective AQI values. (data is data/pollution-stats-city.json).  
 
-[ ] Show trendline during hover. Need to create mock data for this first.
+[] Show trendline during hover. Need to create mock data for this first.  
