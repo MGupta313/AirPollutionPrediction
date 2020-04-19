@@ -37,10 +37,21 @@
 	        pointer-events: none;
 	    }
 
-	    .pie-graph, .bar-graph {
+	    .bar-graph {
 
 	    	width: 250px;
 	    	height: 250px;
+
+	    	border: thin solid grey;
+            background: black;
+            opacity: 1;
+            text-align: center;
+	    }
+
+	    .trend-line {
+
+	    	width: 590px;
+	    	height: 190px;
 
 	    	border: thin solid grey;
             background: black;
@@ -130,25 +141,6 @@
         statesLayer,
         closeTooltip;
 
-    // fetch the state geojson data
-    d3.json( "./data/india-states.json", function (statesData) {
-        statesLayer = L.geoJson(statesData,  {
-            style: getStyle,
-            onEachFeature: onEachFeature
-        }).addTo(map);
-    } );
-
-    function getStyle(feature) {
-        var state = mapCodeToState[feature.properties.code];
-        return {
-            weight: 2,
-            opacity: 0.1,
-            color: 'black',
-            fillOpacity: 0.85,
-            fillColor: getDensityColor( indiaCensus.states[feature.properties.code].density )
-        };
-    }
-
     // get color depending on population density value
     function getDensityColor(d) {
         var colors = Array.prototype.slice.call(mapBrew).reverse(), // creates a copy of the mapBrew array and reverses it
@@ -163,16 +155,15 @@
                 colors[6];
     }
 
-    function onEachFeature(feature, layer) {
-        layer.on({
-            mousemove: mousemove,
-            mouseout: mouseout,
-            //click: zoomToFeature
-        });
-    }
-
-    function convertStateCodeToState(code) {
-
+    function getStyle(feature) {
+        var state = mapCodeToState[feature.properties.code];
+        return {
+            weight: 2,
+            opacity: 0.1,
+            color: 'black',
+            fillOpacity: 0.85,
+            fillColor: getDensityColor( indiaCensus.states[feature.properties.code].density )
+        };
     }
 
     function mousemove(e) {
@@ -219,6 +210,29 @@
         }, 100);
     }
 
+    function onEachFeature(feature, layer) {
+        layer.on({
+            mousemove: mousemove,
+            mouseout: mouseout,
+            //click: zoomToFeature
+        });
+    }
+
+
+    // fetch the state geojson data
+    d3.json( "./data/india-states.json", function (statesData) {
+        statesLayer = L.geoJson(statesData,  {
+            style: getStyle,
+            onEachFeature: onEachFeature
+        }).addTo(map);
+    } );
+
+    //not being used anywhere
+    function convertStateCodeToState(code) {
+
+    }
+
+    //not being used anywhere
     function zoomToFeature(e) {
         map.fitBounds(e.target.getBounds());
     }
@@ -246,7 +260,7 @@
 
     var BarGraphControl = L.Control.extend({
         options: {
-            position: 'bottomright'
+            position: 'topright'
         },
 
         onAdd: function (map) {
@@ -259,6 +273,21 @@
 
     // add only bar graph container
      map.addControl( new BarGraphControl() );
+
+    // Trend line controller added here.
+    var TrendlineControl = L.Control.extend({
+        options: {
+            position: 'bottomright'
+        },
+
+        onAdd: function (map) {
+            // create the control container with a particular class name
+            var container = L.DomUtil.create('div', 'trend-line');
+            // ... initialize other DOM elements, add listeners, etc.
+            return container;
+        }
+    });
+    map.addControl( new TrendlineControl() );
 
     // Pie Graph Container removed here.
 
@@ -276,7 +305,7 @@
                     .style("font-size", "15px")
                     .style("font-weight", "bold")
                     .style("margin", "6px 0");
-
+    
     var barHolder = d3.select(".bar-graph")
                             .append("svg")
                         .attr("id", "pollution-bar")
@@ -311,7 +340,48 @@
                             return nh;
                         })
                         .style("fill",  function(d) { return getLiteracyColor(d); } );
+    //litBAr not used anywhere
+
     // END: Bar Graph (Literacy)
+
+    // START: Trendline (Pollution)
+    var graphWidth = 550,
+    	graphHeight = 170,
+    	xWidth = graphWidth - 10,
+    	yHeight = graphHeight - 10
+
+   	//var x = d3.scaleBand().range([0, xWidth]);
+	//var y = d3.scaleLinear().range([yHeight, 0]);
+
+    var trendName = d3.select(".trend-line")
+                        .append("div")
+                    .text("AQI Trend")
+                    .style("color", "white")
+                    .style("font-size", "15px")
+                    .style("font-weight", "bold")
+                    .style("margin", "6px 0");
+
+    var graphHolder = d3.select(".trend-line")
+                            .append("svg")
+                        .attr("id", "pollution-graph")
+                        .attr("width", graphWidth-10)
+                        .attr("height", graphHeight-18)
+                            .append("g")
+                        .attr("transform", "translate(0," + yHeight + ")")
+      					.call(d3.axisBottom(x))
+      						.append("g")
+      					.call(d3.axisLeft(y));
+                        
+    //var xAxis = d3.select(".trend-line")
+                //    .append("svg")
+                //    .attr("transform", "translate(0," + height + ")")
+      			//	.call(d3.axisBottom(x));
+                      
+    //var yAxis = d3.select(".trend-line")
+      //             .append("g")
+    	//		   .call(d3.axisLeft(y));
+    
+   
 
     // START: Updates both Pie Graph and Bar Graph
     function updateGraph ( aqiData ) {
@@ -340,6 +410,10 @@
         barLegend.text( aqiData.toFixed(2) )
                 .transition().duration(500)
                 .style("color", getLiteracyColor(+aqiData) );
+
+
+        
+
     }// END: updateChart()
 
     function getLiteracyColor (literacy) {
