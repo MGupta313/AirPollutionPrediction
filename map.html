@@ -58,6 +58,12 @@
             opacity: 1;
             text-align: center;
 	    }
+	    .x-axis line {
+			stroke: #fff;
+		}
+		.y-axis line {
+			stroke: #fff;
+		}
 
         .filter-ui {
             background: black;
@@ -360,27 +366,31 @@
 
     var x = d3.time.scale().range([0, xWidth]);
     var y = d3.scale.linear().range([yHeight, 0]);
+
+    var xAxis = d3.svg.axis()
+					    .scale(x)
+					    .tickSize(-yHeight);
+
+	var yAxis = d3.svg.axis()
+					    .scale(y)
+					    .ticks(4)
+					    .orient("left");
+
     
     var graphHolder = d3.select(".trend-line")
                             .append("svg")
                         .attr("id", "pollution-graph")
                         .attr("width", graphWidth-10)
                         .attr("height", graphHeight-18)
-                            .append("g")
-                        .attr("transform", "translate(0," + yHeight + ")")
-      					.call(d3.svg.axis().scale(x).orient("bottom"))
-      						.append("g")
-      					.call(d3.svg.axis().scale(y).orient("left"))
-      					.style("color", "black" );
+    graphHolder.append("g")
+               .attr("class", "x-axis")
+               .attr("transform", "translate(0," + yHeight + ")")
+			   .call(xAxis)
+    graphHolder.append("g")
+    		   .attr("class", "y-axis")
+      		   .call(yAxis);
                         
-    //var xAxis = d3.select(".trend-line")
-                //    .append("svg")
-                //    .attr("transform", "translate(0," + height + ")")
-      			//	.call(d3.axisBottom(x));
-                      
-    //var yAxis = d3.select(".trend-line")
-      //             .append("g")
-    	//		   .call(d3.axisLeft(y));
+
     
    
 
