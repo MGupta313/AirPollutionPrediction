@@ -34,9 +34,14 @@ var mapCodeToState = {
 
 var state_pollution = 0;
 var city_pollution = 0;
+var aqi_images = 0;
+
 d3.json("./data/pollution-stats-state.json", function(data) {
   state_pollution = data;
 });
 d3.json("./data/pollution-stats-city.json", function(data) {
   city_pollution = data;
+});
+d3.json("./data/aqi-images-state.json", function(data) {
+  aqi_images = data; 
 });
