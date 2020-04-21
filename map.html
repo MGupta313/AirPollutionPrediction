@@ -50,8 +50,8 @@
 
 	    .trend-line {
 
-	    	width: 590px;
-	    	height: 190px;
+	    	width: 300px;
+	    	height: 150px;
 
 	    	border: thin solid grey;
             background: white;
@@ -59,10 +59,10 @@
             text-align: center;
 	    }
 	    .x-axis line {
-			stroke: #fff;
+			stroke: red;
 		}
 		.y-axis line {
-			stroke: #fff;
+			stroke: red;
 		}
 
         .filter-ui {
@@ -125,8 +125,10 @@
     <strong>Growth: </strong>{{growth}} % <br>
 </script>
 
-<!-- <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script> -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
+<!-- <script id = "trend-script" type = "text/html" src ="./trends.html"></script> -->
+
+<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script> -->
 <script type="text/javascript" src="./data/literacy.js"></script>
 <script type="text/javascript" src="./data/stateCodes.js"></script>
 
@@ -295,6 +297,8 @@
     });
     map.addControl( new TrendlineControl() );
 
+
+    
     // Pie Graph Container removed here.
 
     // START: Bar Graph (Literacy)
@@ -351,6 +355,56 @@
     // END: Bar Graph (Literacy)
 
     // START: Trendline (Pollution)
+    var svg = d3.select(".trend-line")
+            .append("svg")
+
+	var graphImage = svg.append('image')
+	    .attr('xlink:href', './data/trendline.png')
+	    .attr('width', 300)
+	    .attr('height', 150)
+
+	
+    
+/*
+        var graphWidth = 550;
+        var graphHeight = 170;
+
+        var xScale = d3.time.scale()
+            .range([0, graphWidth]);
+
+        var yScale = d3.scale.linear()
+            .range([graphHeight]);
+
+        var	xAxis = d3.svg.axis().scale(xScale)
+			.orient("bottom").ticks(5);
+ 
+		var	yAxis = d3.svg.axis().scale(yScale)
+			.orient("left").ticks(5);
+ 
+
+        var svg = d3.select(".trend-line")
+            .append("svg")
+            .attr("id", "pollution-graph")
+            .attr("width", graphWidth)
+            .attr("height", graphHeight)
+            .append("g");
+
+        // Add the X Axis
+		svg.append("g")		
+			.attr("class", "x-axis")
+			.attr("transform", "translate(0," + graphHeight + ")")
+			.call(xAxis);
+	 
+		// Add the Y Axis
+		svg.append("g")		
+			.attr("class", "y-axis")
+			.call(yAxis);
+*/
+            
+   
+
+
+/*
     var graphWidth = 550,
     	graphHeight = 170,
     	xWidth = graphWidth - 10,
@@ -369,7 +423,8 @@
 
     var xAxis = d3.svg.axis()
 					    .scale(x)
-					    .tickSize(-yHeight);
+					    .tickSize(-yHeight)
+					    .orient("bottom");
 
 	var yAxis = d3.svg.axis()
 					    .scale(y)
@@ -380,8 +435,10 @@
     var graphHolder = d3.select(".trend-line")
                             .append("svg")
                         .attr("id", "pollution-graph")
-                        .attr("width", graphWidth-10)
-                        .attr("height", graphHeight-18)
+                        .attr("width", xWidth)
+                        .attr("height", yHeight-5)
+                        .style("color", "red" );
+
     graphHolder.append("g")
                .attr("class", "x-axis")
                .attr("transform", "translate(0," + yHeight + ")")
@@ -391,7 +448,7 @@
       		   .call(yAxis);
                         
 
-    
+ */   
    
 
     // START: Updates both Pie Graph and Bar Graph
