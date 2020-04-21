@@ -210,7 +210,7 @@
         // update the graph with literacy and sex ratio data
         updateBarGraph( state_pollution[state] );
 
-        updateTrendGraph ( aqi_images[state] );
+        //updateTrendGraph ( aqi_images[state] );
     }
 
     function mouseout(e) {
@@ -221,18 +221,18 @@
         }, 100);
     }
 
-    //function onClick(arb) {
-    //	var layer = arb.target;
-    //    var code = layer.feature.properties.code;
-    //    var state = mapCodeToState[code];
-    //    updateTrendGraph ( aqi_images[state] );
-    //}
+    function onClick(arb) {
+    	var layer = arb.target;
+        var code = layer.feature.properties.code;
+        var state = mapCodeToState[code];
+        updateTrendGraph ( aqi_images[state] );
+    }
 
     function onEachFeature(feature, layer) {
         layer.on({
             mousemove: mousemove,
             mouseout: mouseout,
-            //click: onClick
+            click: onClick
         });
     }
 
@@ -383,12 +383,6 @@
 		aqiImageData = [];
 		aqiImageData.push( imageFile );
 		console.log(aqiImageData);
-
-		//var arrayLength = aqiImageData.length;
-		//for (var i = 0; i < arrayLength; i++) {
-		 //   console.log(aqiImageData[i]);
-		    //Do something
-		//}
 
 		
 		d3.select(".trend-line").selectAll("image")
