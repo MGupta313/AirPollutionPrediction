@@ -1,100 +1,146 @@
 <!DOCTYPE html>
 <meta charset="utf-8">
-<script type="text/javascript" src="../lib/d3.v5.min.js"></script>
 <style>
 
-.line {
-  fill: none;
-  stroke: steelblue;
-  stroke-width: 2px;
-}
-.dot {
-	fill: #ffab00;
-	stroke: #fff;
-}
+    .line {
+        fill: none;
+        stroke: steelblue;
+        stroke-width: 2px;
+    }
+
+    
+
+
+    @media print {
+        .svg1 {
+            page-break-after: always;
+            page-break-before: always;
+        }
+
+    }
+
 </style>
 <body>
+
+<a href="./map.html" target="_blank"><button>Trendline</button></a>
+
+<script src="../lib/d3.v5.min.js"></script>
+<script src="../lib/d3-dsv.min.js"></script>
+<script src="../lib/d3-fetch.min.js"></script>
+<script src="../lib/d3-scale-chromatic.v1.min.js"></script>
+<script src="../lib/topojson.v2.min.js"></script>
+
 <script>
+var screenWidth = window.innerWidth;
+var screenHeight = window.innerHeight;
 
-// set the dimensions and margins of the graph
-var margin = {top: 20, right: 20, bottom: 30, left: 50},
-	width = 960 - margin.left - margin.right,
-	height = 500 - margin.top - margin.bottom;
+    //var keys = ['5_5.9', '6_6.9', '7_7.9', '8.0+'];
+    var lineColors = ['#FFC300', '#FF5733', '#C70039', '#900C3F'];
 
-// set the ranges
-var x = d3.scaleBand().range([0, width]);
-var y = d3.scaleLinear().range([height, 0]);
+    function q1() {
 
-// define the 1st pollutant (SO2)
-var valueline = d3.line()
-	.x(function(d) { return x(d["date"]; })
-	.y(function(d) { return y(d["so2"]); })
-	.curve(d3.curveMonotoneX);
+        var graphWidth = screenWidth - 200;
+        var graphHeight = screenHeight;
 
-// define the 2nd pollutant (N2O)
-var valueline2 = d3.line()
-	.x(function(d) { return x(d["date"]); })
-	.y(function(d) { return y(d["no2"]); })
-	.curve(d3.curveMonotoneX)
+        var xScale = d3.scaleTime()
+            .range([0, graphWidth - 600]);
 
-// define the 3rd pollutant (AQI)
-var valueline3 = d3.line()
-	.x(function(d) { return x(d["date"]; })
-	.y(function(d) { return y(d["aqi"]); })
-	.curve(d3.curveMonotoneX);
+        var yScale = d3.scaleLinear()
+            .range([graphHeight - 300, 50]);
 
-var svg = d3.select("body").append("svg")
-	.attr("width", width + margin.left + margin.right)
-	.attr("height", height + margin.top + margin.bottom)
-  .append("g")
-	.attr("transform",
-		  "translate(" + margin.left + "," + margin.top + ")");
+        var l4 = d3.line()
+            .curve(d3.curveMonotoneX)
+            .x(function (d) {
+                return xScale(d.year);
+            })
+            .y(function (d) {
+                return yScale(d['5_5.9']);
+            });
 
-d3.csv("pollution-data.csv").then(function(data,error){
+        var svg = d3.select("body")
+            .append("svg")
+            .attr("width", graphWidth)
+            .attr("height", graphHeight)
+            .append("g")
+            .attr("transform", "translate(" + (screenWidth - graphWidth) / 2 + "," + -(screenHeight - graphHeight - 100) / 2 + ")");
 
-  if (error) throw error;
-  // console.log(data)
-  data.forEach(function(d) {
-	  d["date"] = +d["date"];
-	  d["so2"] = +d["so2"];
-	  d["no2"] = +d["no2"];
-	  d["aqi"] = +d["aqi"];
-  });
+        svg.append("g")
+                .call(d3.axisLeft(yScale));
 
-  // Scale the range of the data
-  x.domain(data.map(function(d) { return d["date"]; }));
-  y.domain([0, d3.max(data, function(d) {
-	  return Math.max(d["so2"], Math.max(d["no2"], Math.max(d["aqi"]))); })]);
+        svg.append("g")
+                .attr("transform", "translate(0," + (graphHeight - 300) + ")")
+                .call(d3.axisBottom(xScale));
 
-  // Add the valueline path.
-  svg.append("path")
-	  .data([data])
-	  .attr("class", "line")
-	  .style("stroke","#900C3F")
-	  .attr("d", valueline);
+        svg.append("g")
+                .append("text")
+                .attr("transform", "translate(" + (200) + ", " + ((graphHeight - 500)) + ")")
+                .text("Worldwide Earthquake stats 2000-2015");
 
-  // Add the valueline2 path.
-  svg.append("path")
-	  .data([data])
-	  .attr("class", "line")
-	  .style("stroke", "#C70039")
-	  .attr("d", valueline2);
-svg.append("path")
-	  .data([data])
-	  .attr("class", "line")
-	  .style("stroke","#FF5733")
-	  .attr("d", valueline3); 
-	 
-  // Add the X Axis
-  svg.append("g")
-	  .attr("transform", "translate(0," + height + ")")
-	  .call(d3.axisBottom(x));
+        
 
-  // Add the Y Axis
-  svg.append("g")
-	  .call(d3.axisLeft(y));
+		var myimage = svg.append('image')
+		    .attr('xlink:href', 'http://lorempixel.com/200/200/')
+		    .attr('width', 200)
+		    .attr('height', 200)
 
-});
+/*
+
+        d3.csv("earthquakes.csv", function (data) {
+            return data;
+        }).then(function (data) {
+
+            xScale.domain(d3.extent(data, function (d) {
+                return d.year;
+            }));
+
+            yScale.domain([0, d3.max(data, function (d) {
+                return Math.max(d['8.0+'], d['7_7.9'], d['5_5.9'], d['6_6.9']);
+            })]);
+
+            svg.append("path")
+                .attr("class", "line")
+                .style("stroke", "#900C3F")
+                .attr("d", l4(data));
+
+            var yearScale = d3.scaleTime()
+                .range([0, graphWidth - 600])
+                .domain(d3.extent(data, function (d) {
+                    return new Date(d.year);
+                }));
+
+            svg.append("g")
+                .attr("transform", "translate(0," + (graphHeight - 300) + ")")
+                .call(d3.axisBottom(yearScale));
+
+            svg.append("text")
+                .attr("class", "x label")
+                .attr("x", graphWidth / 2 - 300)
+                .attr("y", graphHeight - 250)
+                .text("Year");
+
+            svg.append("g")
+                .call(d3.axisLeft(yScale));
+
+            svg.append("text")
+                .attr("class", "y label")
+                .attr("x", -250)
+                .attr("y", graphHeight - 600)
+                .attr("transform", "rotate(-90)")
+                .text("Num of Earthquakes");
+
+            svg.append("g")
+                .append("text")
+                .attr("transform", "translate(" + (200) + ", " + ((graphHeight - 500)) + ")")
+                .text("Worldwide Earthquake stats 2000-2015");
+
+            
+
+            
+        });
+
+*/
+    }
+    q1();
 
 </script>
 </body>
